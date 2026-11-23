@@ -22,6 +22,8 @@ def add_features(df):
         DataFrame with some column features added
 
     """
+    logger.info(f"Adding features to {len(df)} rows")
+
     df = df.copy()
     df["is_dog"] = _check_is_dog(df["animal_type"])
 
@@ -39,6 +41,9 @@ def add_features(df):
 
     # Age in days upon outcome.
     df["days_upon_outcome"] = _compute_days_upon_outcome(df["age_upon_outcome"])
+
+    logger.info("Finished adding features")
+    logger.debug(f"Columns: {list(df.columns)}")
 
     return df
 
@@ -60,7 +65,9 @@ def _check_is_dog(animal_type):
     # Check if it's either a cat or a dog.
     is_cat_dog = animal_type.str.lower().isin(["dog", "cat"])
     if not is_cat_dog.all():
-        print("Found something else but dogs and cats:\n%s", animal_type[~is_cat_dog])
+        logger.error(
+            f"Found something else but dogs and cats:\n{animal_type[~is_cat_dog]}"
+        )
         raise RuntimeError("Found pets that are not dogs or cats.")
     is_dog = animal_type.str.lower() == "dog"
     return is_dog
@@ -81,6 +88,7 @@ def _check_has_name(name):
 
     """
     has_name = name.str.lower() != "unknown"
+    logger.debug(f"Found {(~has_name).sum()} animals without a name")
     # if not has_name.all():
     #     print("Found animals without a name:\n%s", name[~has_name])
     #     raise RuntimeError("Found animals without a name.")
@@ -186,5 +194,8 @@ def _compute_days_upon_outcome(age_upon_outcome):
         "day": 1,
     }
     days_upon_outcome = time.astype(float) * period.map(period_mapping)
+    n_missing = days_upon_outcome.isna().sum()
+    if n_missing:
+        logger.warning(f"Could not determine age for {n_missing} animals")
 
     return days_upon_outcome
