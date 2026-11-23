@@ -55,19 +55,20 @@ def test_check_has_name():
     assert_series_equal(result, expected)
 
 
-def test_get_sex():
-    s = pd.Series(["Neutered Male", "Spayed Female", "Intact Male", "Unknown"])
-    result = features._get_sex(s)
+@pytest.fixture()
+def list_of_sex():
+    return pd.Series(["Neutered Male", "Spayed Female", "Intact Male", "Unknown"])
+
+
+def test_get_sex(list_of_sex):
+    result = features._get_sex(list_of_sex)
     expected = pd.Series(["male", "female", "male", "unknown"])
     assert_series_equal(result, expected)
 
 
-def test_get_neutered():
-    s = pd.Series(
-        ["Neutered Male", "Spayed Female", "Intact Male", "Intact Female", "Unknown"]
-    )
-    result = features._get_neutered(s)
-    expected = pd.Series(["fixed", "fixed", "intact", "intact", "unknown"])
+def test_get_neutered(list_of_sex):
+    result = features._get_neutered(list_of_sex)
+    expected = pd.Series(["fixed", "fixed", "intact", "unknown"])
     assert_series_equal(result, expected)
 
 
