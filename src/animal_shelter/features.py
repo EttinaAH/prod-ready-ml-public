@@ -1,7 +1,11 @@
 """Feature engineering for the animal shelter data."""
 
+import logging
+
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger("animal_shelter")
 
 
 def add_features(df):

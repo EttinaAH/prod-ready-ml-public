@@ -1,7 +1,9 @@
 """Load and clean the animal shelter data."""
 
+import logging
 import re
 
+logger = logging.getLogger("animal_shelter")
 import pandas as pd
 
 
@@ -19,12 +21,18 @@ def load_data(path):
         DataFrame with data
 
     """
+    logger.info(f"Loading data from {path}")
+
     df = (
         pd.read_csv(path, parse_dates=["DateTime"])
         .rename(columns=lambda x: x.replace("upon", "Upon"))
         .rename(columns=convert_camel_case)
         .fillna("Unknown")
     )
+
+    logger.info(f"Loaded {len(df)} rows and {len(df.columns)} columns")
+    logger.debug(f"Columns: {list(df.columns)}")
+
     return df
 
 
