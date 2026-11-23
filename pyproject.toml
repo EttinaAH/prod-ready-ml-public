@@ -22,3 +22,21 @@ dev = [
     "pre-commit>=4.7.0",
     "ruff>=0.17.6",
 ]
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+     ".venv"
+     ]
+
+[tool.ruff.lint]
+extend-select = [
+  "UP", # pyupgrade
+  "D",  # pydocstyle
+  "N",  # PEP8 names
+  "I"  # isort
+]
