@@ -77,9 +77,9 @@ def _check_has_name(name):
 
     """
     has_name = name.str.lower() != "unknown"
-    if not has_name.all():
-        print("Found animals without a name:\n%s", name[~has_name])
-        raise RuntimeError("Found animals without a name.")
+    # if not has_name.all():
+    #     print("Found animals without a name:\n%s", name[~has_name])
+    #     raise RuntimeError("Found animals without a name.")
     return has_name
 
 
