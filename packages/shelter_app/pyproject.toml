@@ -1,0 +1,23 @@
+[project]
+name = "shelter-app"
+version = "0.1.0"
+description = "API and CLI that serve the animal_shelter model."
+requires-python = ">=3.11"
+dependencies = [
+    "animal-shelter",
+    "fastapi>=0.165.0",
+    "pandas>=3.1.1",
+    "pydantic-settings>=2.16.3",
+    "typer>=0.29.2",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+shelter = "shelter_app.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.13.4,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+animal-shelter = { workspace = true }

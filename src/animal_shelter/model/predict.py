@@ -1,5 +1,7 @@
 """Make predictions with a trained animal shelter model."""
 
+from pathlib import Path
+
 import joblib
 import numpy as np
 import pandas as pd
@@ -7,15 +9,17 @@ from sklearn.pipeline import Pipeline
 
 from animal_shelter.data import load_data
 from animal_shelter.features import add_features
-from animal_shelter.model.train import CAT_FEATURES, NUM_FEATURES
+from animal_shelter.model.train import DATA_DIR, DEFAULT_MODEL_PATH, select_features
+
+__all__ = ["load_model", "predict", "predict_model", "select_features"]
 
 
-def load_model(path: str) -> Pipeline:
+def load_model(path: str | Path) -> Pipeline:
     """Load a fitted model from disk.
 
     Parameters
     ----------
-    path : str
+    path : str or pathlib.Path
         Path to the saved model
 
     Returns
@@ -25,31 +29,6 @@ def load_model(path: str) -> Pipeline:
 
     """
     return joblib.load(path)
-
-
-def select_features(
-    df: pd.DataFrame,
-    cat_features: list[str] = CAT_FEATURES,
-    num_features: list[str] = NUM_FEATURES,
-) -> pd.DataFrame:
-    """Select the feature columns used by the model.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        DataFrame with features (see add_features)
-    cat_features : list of str
-        Names of the categorical feature columns
-    num_features : list of str
-        Names of the numeric feature columns
-
-    Returns
-    -------
-    x : pandas.DataFrame
-        Feature columns
-
-    """
-    return df[cat_features + num_features]
 
 
 def predict_model(clf_model: Pipeline, df: pd.DataFrame) -> np.ndarray:
@@ -73,7 +52,8 @@ def predict_model(clf_model: Pipeline, df: pd.DataFrame) -> np.ndarray:
 
 
 def predict(
-    data_path: str = "../data/test.csv", model_path: str = "../data/model.joblib"
+    data_path: str | Path = DATA_DIR / "test.csv",
+    model_path: str | Path = DEFAULT_MODEL_PATH,
 ) -> np.ndarray:
     """Load the test data and a trained model, and make predictions."""
     test_data = load_data(data_path)

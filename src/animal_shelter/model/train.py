@@ -1,5 +1,7 @@
 """Train a model on the animal shelter data."""
 
+from pathlib import Path
+
 import joblib
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -20,6 +22,11 @@ CAT_FEATURES: list[str] = [
 ]
 NUM_FEATURES: list[str] = ["days_upon_outcome"]
 TARGET: str = "outcome_type"
+RANDOM_STATE: int = 28
+
+# src/animal_shelter/model/train.py -> project root
+DATA_DIR: Path = Path(__file__).resolve().parents[3] / "data"
+DEFAULT_MODEL_PATH: Path = DATA_DIR / "model.joblib"
 
 
 def build_transformer(
@@ -55,7 +62,9 @@ def build_transformer(
 
 
 def build_model(
-    cat_features: list[str] = CAT_FEATURES, num_features: list[str] = NUM_FEATURES
+    cat_features: list[str] = CAT_FEATURES,
+    num_features: list[str] = NUM_FEATURES,
+    random_state: int | None = RANDOM_STATE,
 ) -> Pipeline:
     """Build the full model pipeline (preprocessing + classifier).
 
@@ -65,6 +74,8 @@ def build_model(
         Names of the categorical feature columns
     num_features : list of str
         Names of the numeric feature columns
+    random_state : int or None
+        Seed for the classifier, so that training is reproducible
 
     Returns
     -------
@@ -74,9 +85,37 @@ def build_model(
     """
     transformer = build_transformer(cat_features, num_features)
     clf_model = Pipeline(
-        [("transformer", transformer), ("model", RandomForestClassifier())]
+        [
+            ("transformer", transformer),
+            ("model", RandomForestClassifier(random_state=random_state)),
+        ]
     )
     return clf_model
+
+
+def select_features(
+    df: pd.DataFrame,
+    cat_features: list[str] = CAT_FEATURES,
+    num_features: list[str] = NUM_FEATURES,
+) -> pd.DataFrame:
+    """Select the feature columns used by the model.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame with features (see add_features)
+    cat_features : list of str
+        Names of the categorical feature columns
+    num_features : list of str
+        Names of the numeric feature columns
+
+    Returns
+    -------
+    x : pandas.DataFrame
+        Feature columns
+
+    """
+    return df[cat_features + num_features]
 
 
 def split_features_target(
@@ -106,7 +145,7 @@ def split_features_target(
         Target column
 
     """
-    x = df[cat_features + num_features]
+    x = select_features(df, cat_features, num_features)
     y = df[target]
     return x, y
 
@@ -131,14 +170,14 @@ def train_model(df: pd.DataFrame) -> Pipeline:
     return clf_model
 
 
-def save_model(clf_model: Pipeline, path: str) -> None:
+def save_model(clf_model: Pipeline, path: str | Path) -> None:
     """Save a fitted model to disk.
 
     Parameters
     ----------
     clf_model : sklearn.pipeline.Pipeline
         Fitted model pipeline
-    path : str
+    path : str or pathlib.Path
         Path to write the model to
 
     """
@@ -146,7 +185,8 @@ def save_model(clf_model: Pipeline, path: str) -> None:
 
 
 def train(
-    data_path: str = "../data/train.csv", model_path: str = "../data/model.joblib"
+    data_path: str | Path = DATA_DIR / "train.csv",
+    model_path: str | Path = DEFAULT_MODEL_PATH,
 ) -> Pipeline:
     """Load the training data, train a model and save it."""
     raw_data = load_data(data_path)

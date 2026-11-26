@@ -27,6 +27,8 @@ def load_data(path):
         pd.read_csv(path, parse_dates=["DateTime"])
         .rename(columns=lambda x: x.replace("upon", "Upon"))
         .rename(columns=convert_camel_case)
+        # Fully empty columns are read as float, which can't hold "Unknown".
+        .apply(lambda col: col.astype("str") if col.isna().all() else col)
         .fillna("Unknown")
     )
 
