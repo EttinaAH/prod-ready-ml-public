@@ -1,0 +1,44 @@
+"""Load and clean the animal shelter data."""
+
+import logging
+import re
+
+logger = logging.getLogger("animal_shelter")
+import pandas as pd
+
+
+def load_data(path):
+    """Load the data and convert the column names.
+
+    Parameters
+    ----------
+    path : str
+        Path to data
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        DataFrame with data
+
+    """
+    logger.info(f"Loading data from {path}")
+
+    df = (
+        pd.read_csv(path, parse_dates=["DateTime"])
+        .rename(columns=lambda x: x.replace("upon", "Upon"))
+        .rename(columns=convert_camel_case)
+        # Fully empty columns are read as float, which can't hold "Unknown".
+        .apply(lambda col: col.astype("str") if col.isna().all() else col)
+        .fillna("Unknown")
+    )
+
+    logger.info(f"Loaded {len(df)} rows and {len(df.columns)} columns")
+    logger.debug(f"Columns: {list(df.columns)}")
+
+    return df
+
+
+def convert_camel_case(name):
+    """Convert camelCaseString to snake_case_string."""
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
